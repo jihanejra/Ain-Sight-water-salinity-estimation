@@ -18,7 +18,9 @@ const os = require('os');
 // ─────────────────────────────────────────────
 // CONFIG
 // ─────────────────────────────────────────────
-const BACKEND_URL = 'http://127.0.0.1:5001'; // Flask backend
+// Backend Ain Sight (ml/src/api.py). Surchargeable par variable d'environnement
+// pour pointer sur un service deploye.
+const BACKEND_URL = process.env.BACKEND_URL || 'http://127.0.0.1:5001';
 
 // Ignore all messages received before bot startup
 const BOT_START_TIME = Math.floor(Date.now() / 1000);
@@ -315,10 +317,6 @@ async function handleMessage(phone, body, location) {
             // Build full context with SHAP factors and model parameters
             const context = session.prediction ? {
                 ce: session.prediction.ce,
-                ce_rf: session.prediction.ce_rf,
-                ce_krigeage: session.prediction.ce_krigeage,
-                poids_rf: session.prediction.poids_rf,
-                poids_krigeage: session.prediction.poids_krigeage,
                 ci_lower: session.prediction.ci_lower,
                 ci_upper: session.prediction.ci_upper,
                 zone: session.zone,

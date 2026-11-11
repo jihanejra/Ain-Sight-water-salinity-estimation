@@ -4,7 +4,10 @@ import './App.css'
 // ═══════════════════════════════════════════════
 // TYPES
 // ═══════════════════════════════════════════════
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://192.168.100.117:5001'
+// Configurable via .env (voir .env.example). Le repli local sert au
+// developpement ; en production VITE_API_URL doit pointer sur l'URL publique
+// du backend, sinon l'application deployee ne peut joindre aucun serveur.
+const API_URL = import.meta.env.VITE_API_URL ?? 'http://127.0.0.1:5001'
 
 type Screen = 'login' | 'home' | 'map' | 'details' | 'loading' | 'results' | 'chat'
 interface ChatMessage { role: 'user' | 'assistant'; content: string }
@@ -13,9 +16,9 @@ interface WellData { lat: number; lng: number; depth: number; culture: string; c
 interface Factor { nom_fr: string; nom_ar: string; shap: number; direction: 'up' | 'down'; value: number }
 interface CropResult { key: string; nom_fr: string; nom_ar: string; seuil: number; compatible: boolean }
 interface Prediction {
-  ce: number; ce_rf: number; ce_krigeage: number;
-  poids_rf: number; poids_krigeage: number;
+  ce: number; modele: string;
   ci_lower: number; ci_upper: number;
+  coverage: { status: string; message_ar: string; dist_nearest_point_km: number; n_points_within_15km: number };
   risk: RiskLevel; level: string; color: string;
   verdict_fr: string; verdict_ar: string;
   factors: Factor[]; cultures: CropResult[];
@@ -258,10 +261,6 @@ export default function App() {
           history: chatMessages,
           context: prediction ? {
             ce: prediction.ce,
-            ce_rf: prediction.ce_rf,
-            ce_krigeage: prediction.ce_krigeage,
-            poids_rf: prediction.poids_rf,
-            poids_krigeage: prediction.poids_krigeage,
             ci_lower: prediction.ci_lower,
             ci_upper: prediction.ci_upper,
             zone: well.zone,
@@ -359,7 +358,7 @@ export default function App() {
       setAiLoading(false)
     } catch (err) {
       console.error('Backend error:', err)
-      alert('تعذر الاتصال بالخادم. تأكد أن الخادم يعمل على المنفذ 5000.\n\npython api.py')
+      alert('تعذر الاتصال بالخادم. حاول مرة أخرى.')
       setScreen('details')
     }
   }
